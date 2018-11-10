@@ -12,7 +12,7 @@ function mapValuesDeep(valMain, schema) {
     else return false;
   } else if (isObject(valMain)) {
     return mapValues(valMain, (valChild, keyChild) => {
-      let schemaControl = schema[keyChild];
+      const schemaControl = schema[keyChild];
       if (schemaControl === undefined) {
         return false;
       } else return mapValuesDeep(valChild, schemaControl);
@@ -26,10 +26,10 @@ function mapValuesDeep(valMain, schema) {
 function SchemaControl(data, schema) {
   if (isArray(schema) && isArray(data)) {
     if (schema.length === 0) return true;
-    let typeOfArray = data.map((item, index) => {
+    const typeOfArray = data.map((item, index) => {
       return mapValuesDeep(item, schema[0]);
     });
-    let isCorrect = typeOfArray
+    const isCorrect = typeOfArray
       .map(typeOfItem => isEqual(typeOfItem, schema[0]))
       .find(bool => !bool);
     return typeof isCorrect === "undefined";
@@ -37,24 +37,30 @@ function SchemaControl(data, schema) {
     if (Object.keys(schema).length === 0) {
       return true;
     }
-    let typeOfObject = mapValuesDeep(data, schema);
-    let isCorrect = isEqual(typeOfObject, schema);
+    const typeOfObject = mapValuesDeep(data, schema);
+    const isCorrect = isEqual(typeOfObject, schema);
     return isCorrect;
   }
   return typeof data === schema;
 }
-function MultiSchemaControl (data,schema){
-if(isArray(schema) && schema.length >1){
-  if(isArray(data)){
-    let multiControl = data.map(item=>{
-      let schemaMap= schema.map(types=>SchemaControl(item,types))
-      return schemaMap.includes(true)
-    })
-    return multiControl.filter(c=>c).length === data.length
+function MultiSchemaControl (schema,data){
+if(data === undefined){
+  const readySchema=(later)=>MultiSchemaControl(schema,later)
+  return readySchema
+}else{
+  if(isArray(schema) && schema.length >1){
+    const ArrayControl=schema.filter(types=>isArray(types))
+    if(isArray(data) && ArrayControl.length !== schema.length){
+      const multiControl = data.map(item=>{
+        const schemaMap= schema.map(types=>SchemaControl(item,types))
+        return schemaMap.includes(true)
+      })
+      return multiControl.filter(c=>c).length === data.length
+    }
+    const multiControl = schema.map(types=>SchemaControl(data,types))
+    return multiControl.includes(true)
   }
-  let multiControl = schema.map(types=>SchemaControl(data,types))
-  return multiControl.includes(true)
+  else return SchemaControl(data,schema)
 }
-else return SchemaControl(data,schema)
 }
 module.exports = MultiSchemaControl;
