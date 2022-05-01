@@ -1,0 +1,9 @@
+tasks:
+  - before: echo "Before"
+    init: yarn install
+  - name: Start Server 1
+    command: yarn start 4000
+
+ports:
+  - port: 4000
+  - port: 8000

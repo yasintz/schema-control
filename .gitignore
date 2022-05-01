@@ -1,5 +1,3 @@
 node_modules/
 using.js
-package-lock.json
-yarn.lock
 .vscode
